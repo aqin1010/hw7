@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交通部觀光署組織架構互動圖 — 多視圖整合系統</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- amCharts 5 Core & Hierarchy Modules -->
+    <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/hierarchy.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/themes/ResponsiveMax.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/themes/Adaptive.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        #chartdiv {
+            width: 100%;
+            height: 100%;
+        }
+        /* Custom subtle scrollbar for detail panel & search results */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col h-screen overflow-hidden select-none sm:select-auto">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-gradient-to-r from-[#0c2d48] via-[#145374] to-[#0f4c5c] text-white px-4 sm:px-6 py-3 shadow-md z-30 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <!-- Brand & Title -->
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-center text-amber-300 shadow-inner shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-base sm:text-lg font-bold tracking-wide text-white">交通部觀光署組織架構</h1>
+                        <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-400/20 text-amber-200 border border-amber-300/30">
+                            Tourism Administration, MOTC
+                        </span>
+                    </div>
+                    <p class="text-xs text-sky-200/90 mt-0.5">署長1人・副署長2人・主任秘書1人｜整合階層樹狀、旭日與力導向網絡三維視圖</p>
+                </div>
+            </div>
+            <!-- Mobile Info Drawer Toggle -->
+            <button id="mobileDrawerToggle" class="lg:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition" title="檢視單位詳情">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- View Mode Switcher Tabs -->
+        <nav class="flex items-center bg-slate-900/40 p-1 rounded-xl border border-white/15 overflow-x-auto" aria-label="圖表視圖切換">
+            <button data-mode="tree" class="mode-tab active flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap bg-white text-[#0c2d48] shadow-sm">
+                <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path>
+                </svg>
+                階層樹狀圖 (Tree)
+            </button>
+            <button data-mode="sunburst" class="mode-tab flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap text-sky-100 hover:text-white hover:bg-white/10">
+                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                旭日圖 (Sunburst)
+            </button>
+            <button data-mode="force" class="mode-tab flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap text-sky-100 hover:text-white hover:bg-white/10">
+                <svg class="w-4 h-4 text-sky-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                </svg>
+                力導向網絡圖 (Force-Directed)
+            </button>
+        </nav>
+    </header>
+
+    <!-- Secondary Interactive Toolbar -->
+    <div class="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 z-20 shadow-sm">
+        <!-- Real-time Search Box with Dropdown -->
+        <div class="relative w-full sm:w-80">
+            <div class="relative flex items-center">
+                <svg class="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input id="searchInput" type="text" placeholder="搜尋單位名稱或業務關鍵字（如：日月潭、旅宿、東京）..."
+                    class="w-full pl-9 pr-8 py-1.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition placeholder:text-slate-400">
+                <button id="clearSearchBtn" class="hidden absolute right-2.5 text-slate-400 hover:text-slate-600" title="清除搜尋">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <!-- Search Suggestions Popover -->
+            <div id="searchResults" class="hidden absolute left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-72 overflow-y-auto z-50 divide-y divide-slate-100"></div>
+        </div>
+
+        <!-- Mode Hint & Action Buttons -->
+        <div class="flex items-center flex-wrap gap-2 w-full sm:w-auto justify-between sm:justify-end">
+            <span id="modeHint" class="text-xs text-slate-500 hidden xl:inline-block mr-2">
+                💡 提示：點擊節點展開/收合分支，滾輪縮放、拖曳平移畫布
+            </span>
+            <div class="flex items-center gap-2">
+                <button id="expandAllBtn" class="px-3 py-1.5 text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-100 transition flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                    </svg>
+                    全部展開
+                </button>
+                <button id="collapseAllBtn" class="px-3 py-1.5 text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 rounded-lg hover:bg-slate-200 transition flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"></path>
+                    </svg>
+                    全部收合
+                </button>
+                <button id="resetViewBtn" class="px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200 rounded-lg hover:bg-amber-100 transition flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    重置視角
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Workspace: Interactive Canvas + Detail Drawer -->
+    <div class="flex-1 flex relative overflow-hidden">
+        <!-- Chart Canvas Area -->
+        <main class="flex-1 relative bg-gradient-to-br from-slate-50 via-sky-50/30 to-slate-100 overflow-hidden">
+            <!-- Subtle Legend Pill -->
+            <div class="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur-sm border border-slate-200/80 rounded-xl px-3 py-2 shadow-sm hidden sm:flex items-center gap-3 text-[11px] text-slate-600">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#0c2d48]"></span>署本部</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#0d9488]"></span>內部單位 (6組5室)</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#0284c7]"></span>所屬機構 (13風管處)</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#d97706]"></span>任務編組/派出單位</span>
+            </div>
+
+            <!-- Toast Notification Banner -->
+            <div id="toastBanner" class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-20 bg-slate-900/90 text-white text-xs px-4 py-2 rounded-full shadow-lg backdrop-blur-sm transition-opacity"></div>
+
+            <!-- amCharts 5 Mount Container -->
+            <div id="chartdiv"></div>
+        </main>
+
+        <!-- Right-Hand Detail Drawer -->
+        <aside id="detailDrawer" class="fixed lg:static inset-y-0 right-0 w-80 sm:w-96 bg-white border-l border-slate-200 shadow-xl lg:shadow-none z-40 transform translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col">
+            <!-- Drawer Header -->
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-5 rounded-full bg-teal-600"></span>
+                    <h2 class="text-sm font-bold text-slate-800">單位職掌與組織詳情</h2>
+                </div>
+                <button id="closeDrawerBtn" class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Drawer Body -->
+            <div class="p-5 flex-1 overflow-y-auto space-y-5">
+                <!-- Parent Breadcrumb Path -->
+                <div>
+                    <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">隸屬層級路徑</div>
+                    <div id="detailPath" class="flex flex-wrap items-center gap-1 text-xs text-teal-700 bg-teal-50/80 border border-teal-100 px-3 py-2 rounded-lg font-medium">
+                        交通部觀光署
+                    </div>
+                </div>
+
+                <!-- Selected Unit Card -->
+                <div class="bg-gradient-to-br from-[#0c2d48] to-[#145374] text-white rounded-2xl p-4 shadow-md">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span id="detailBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-400/20 text-amber-200 border border-amber-300/30">
+                            最高觀光主管機關
+                        </span>
+                        <span id="detailChildCount" class="text-xs text-sky-200 font-medium">
+                            下轄 3 大部門區塊
+                        </span>
+                    </div>
+                    <h3 id="detailTitle" class="text-lg font-bold leading-snug">交通部觀光署</h3>
+                </div>
+
+                <!-- Official Description / Responsibilities -->
+                <div>
+                    <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">掌理業務與轄區說明</div>
+                    <div id="detailDesc" class="text-sm text-slate-700 leading-relaxed bg-slate-50 border border-slate-200/80 rounded-xl p-3.5">
+                        2023年9月15日由原交通部觀光局改制升格。置署長1人、副署長2人及主任秘書1人，統籌全國觀光政策規劃、產業輔導、國家風景區經營管理及國際觀光行銷推廣。
+                    </div>
+                </div>
+
+                <!-- Sub-units List -->
+                <div id="subUnitsSection">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">直屬下級單位清單</span>
+                        <span id="subUnitsBadge" class="text-[11px] text-slate-500">點擊可切換檢視</span>
+                    </div>
+                    <div id="detailSubUnits" class="grid grid-cols-1 gap-1.5"></div>
+                </div>
+            </div>
+
+            <!-- Drawer Footer -->
+            <div class="px-5 py-3 border-t border-slate-100 bg-slate-50/80 text-[11px] text-slate-400 flex items-center justify-between">
+                <span>點擊圖表任意節點更新資訊</span>
+                <button id="licenseModalBtn" class="text-teal-700 hover:underline font-medium">MIT 授權宣告</button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Bottom Status Footer -->
+    <footer class="bg-white border-t border-slate-200 px-4 sm:px-6 py-2 text-[11px] text-slate-500 flex flex-wrap items-center justify-between gap-2 z-20">
+        <div class="flex items-center gap-2">
+            <span>資料來源：交通部觀光署組織法與官方編制（6組5室・13風管處・3旅服中心・17駐外辦事處）</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span>Copyright &copy; 2026 蕭鈺秦 (MIT License)</span>
+            <span class="hidden sm:inline text-slate-300">|</span>
+            <span class="hidden sm:inline">Powered by amCharts 5</span>
+        </div>
+    </footer>
+
+    <!-- MIT License Modal -->
+    <div id="licenseModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+                <h3 class="text-sm font-bold">The MIT License (MIT) 授權聲明</h3>
+                <button id="closeLicenseBtn" class="text-slate-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-5 text-xs text-slate-600 leading-relaxed space-y-3 font-mono bg-slate-50 max-h-80 overflow-y-auto">
+                <p class="font-bold text-slate-800">Copyright (c) 2026 蕭鈺秦</p>
+                <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+                <p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+                <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+            </div>
+            <div class="px-5 py-3 bg-white border-t border-slate-200 flex justify-end">
+                <button id="confirmLicenseBtn" class="px-4 py-1.5 bg-[#0c2d48] text-white text-xs font-medium rounded-lg hover:bg-[#145374] transition">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Complete Taiwan Tourism Administration (交通部觀光署) Hierarchical Dataset
+         * Includes value weights for Sunburst / ForceDirected sizing and rich descriptions.
+         */
+        const tourismOrgData = {
+            id: "motc-ta",
+            name: "交通部觀光署",
+            category: "最高觀光主管機關",
+            color: "#0c2d48",
+            description: "2023年9月15日由原交通部觀光局改制升格。置署長1人、副署長2人及主任秘書1人，下設署本部內部單位（6組、5室）、13個國家風景區管理處及任務編組／派出單位，統籌全國觀光政策規劃、產業輔導與國際行銷推廣。",
+            children: [
+                {
+                    id: "hq-internal",
+                    name: "署本部內部單位",
+                    category: "署本部編制 (6組5室)",
+                    color: "#0d9488",
+                    description: "交通部觀光署本部設有6個業務組與5個幕僚室，負責全國觀光政策法規、產業輔導評鑑、景區建設督導及行政支援。",
+                    children: [
+                        {
+                            id: "business-divisions",
+                            name: "業務單位 (6組)",
+                            category: "核心業務單位",
+                            color: "#0f766e",
+                            description: "掌理觀光政策規劃、旅行業與旅宿業管理輔導、國家風景區規劃督導、國際行銷及國民旅遊推廣等六大核心業務。",
+                            children: [
+                                { id: "div-planning", name: "企劃組", value: 2, category: "業務單位", color: "#14b8a6", description: "觀光政策與中長程計畫研擬、施政管考、觀光市場調查統計與研究、法制及綜合性業務。" },
+                                { id: "div-travel", name: "旅行業組", value: 2, category: "業務單位", color: "#14b8a6", description: "旅行業、導遊及領隊人員之管理與輔導、從業人員培育訓練、觀光公益法人輔導。" },
+                                { id: "div-hotel", name: "旅宿組", value: 2, category: "業務單位", color: "#14b8a6", description: "觀光旅館業、旅館業及民宿之管理輔導、星級旅館評鑑、旅宿業法規與品質提升。" },
+                                { id: "div-scenic", name: "景區發展組", value: 2, category: "業務單位", color: "#14b8a6", description: "觀光資源調查與整體規劃、國家風景區建設計畫審核與督導、觀光遊樂業管理、促參案件推動。" },
+                                { id: "div-intl", name: "國際組", value: 2, category: "業務單位", color: "#14b8a6", description: "國際觀光市場行銷推廣、國際觀光組織與合作交流、駐外辦事處業務督導、境外旅客來台促進。" },
+                                { id: "div-domestic", name: "旅遊推廣組", value: 2, category: "業務單位", color: "#14b8a6", description: "國內旅遊（國民旅遊）推廣、大型觀光活動與節慶策辦、區域觀光圈整合、智慧觀光發展。" }
+                            ]
+                        },
+                        {
+                            id: "staff-offices",
+                            name: "幕僚單位 (5室)",
+                            category: "行政幕僚單位",
+                            color: "#115e59",
+                            description: "支援署本部及所屬機構之文書公關、人事任免、政風廉政、主計會計及智慧資訊系統維運。",
+                            children: [
+                                { id: "off-sec", name: "秘書室", value: 1.5, category: "幕僚單位", color: "#2dd4bf", description: "文書檔案、印信典守、出納、採購營繕、國會聯絡與媒體公關事務（對外常以任務編組「公關室」運作）。" },
+                                { id: "off-hr", name: "人事室", value: 1.5, category: "幕僚單位", color: "#2dd4bf", description: "組織編制、人員任免遷調、考核獎懲及訓練進修。" },
+                                { id: "off-ethics", name: "政風室", value: 1.5, category: "幕僚單位", color: "#2dd4bf", description: "廉政宣導、貪瀆預防、公務機密維護及安全維護。" },
+                                { id: "off-acct", name: "主計室", value: 1.5, category: "幕僚單位", color: "#2dd4bf", description: "歲計、會計及統計業務。" },
+                                { id: "off-info", name: "資訊室", value: 1.5, category: "幕僚單位", color: "#2dd4bf", description: "觀光資訊系統規劃建置、資通安全維護及數位轉型業務。" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: "national-scenic-areas",
+                    name: "所屬機構 (13個國家風景區管理處)",
+                    category: "所屬四級機構",
+                    color: "#0284c7",
+                    description: "於全台灣北、中、南、東及離島地區設有13個國家風景區管理處，負責轄區內觀光資源保育、遊憩設施建設與經營管理。",
+                    children: [
+                        {
+                            id: "nsa-north",
+                            name: "北部地區 (2處)",
+                            category: "國家風景區管理處",
+                            color: "#0369a1",
+                            description: "轄管北台灣海岸線、地質公園與山海遊憩廊帶。",
+                            children: [
+                                { id: "nsa-northcoast", name: "北海岸及觀音山國家風景區管理處", value: 2, category: "北部風景區", color: "#38bdf8", description: "轄管新北市觀音山、淡水以東至基隆外木山及和平島海岸線，涵蓋野柳地質公園、白沙灣與金山萬里溫泉區。" },
+                                { id: "nsa-northeast", name: "東北角及宜蘭海岸國家風景區管理處", value: 2, category: "北部風景區", color: "#38bdf8", description: "轄管新北市瑞芳至宜蘭蘇澳海岸線及龜山島，以海蝕地形、福隆沙灘、草嶺古道及海洋生態聞名。" }
+                            ]
+                        },
+                        {
+                            id: "nsa-central",
+                            name: "中部地區 (2處)",
+                            category: "國家風景區管理處",
+                            color: "#0369a1",
+                            description: "轄管中台灣高山森林、湖泊水域與多元族群文化景區。",
+                            children: [
+                                { id: "nsa-trimountain", name: "參山國家風景區管理處", value: 2, category: "中部風景區", color: "#38bdf8", description: "橫跨新竹、苗栗、台中、彰化及南投五縣市，轄管獅頭山、梨山及八卦山三大風景區。" },
+                                { id: "nsa-sunmoonlake", name: "日月潭國家風景區管理處", value: 2, category: "中部風景區", color: "#38bdf8", description: "轄管南投日月潭、埔里、集集、車埕及水里溪流域，結合湖光山色、自行車道與邵族原民文化。" }
+                            ]
+                        },
+                        {
+                            id: "nsa-south",
+                            name: "南部地區 (5處)",
+                            category: "國家風景區管理處",
+                            color: "#0369a1",
+                            description: "轄管南台灣高山雲海、濱海濕地鹽田、水庫溫泉與熱帶海灣。",
+                            children: [
+                                { id: "nsa-alishan", name: "阿里山國家風景區管理處", value: 2, category: "南部風景區", color: "#38bdf8", description: "轄管嘉義縣番路、竹崎、梅山、阿里山等四鄉，以日出、雲海、晚霞、森林鐵道、高山茶與鄒族文化著稱。" },
+                                { id: "nsa-swcoast", name: "雲嘉南濱海國家風景區管理處", value: 2, category: "南部風景區", color: "#38bdf8", description: "轄管雲林、嘉義及台南濱海地區，融合濕地生態、黑面琵鷺賞鳥、井仔腳瓦盤鹽田與漁村文化。" },
+                                { id: "nsa-siraya", name: "西拉雅國家風景區管理處", value: 2, category: "南部風景區", color: "#38bdf8", description: "轄管台南及嘉義內陸丘陵水庫區（曾文、烏山頭、虎頭埤等）、關子嶺泥漿溫泉與西拉雅族文化。" },
+                                { id: "nsa-maolin", name: "茂林國家風景區管理處", value: 2, category: "南部風景區", color: "#38bdf8", description: "轄管高雄桃源、六龜、茂林及屏東霧台、瑪家、三地門等六鄉區，擁有紫斑蝶谷、寶來溫泉與魯凱、排灣文化。" },
+                                { id: "nsa-dapengbay", name: "大鵬灣國家風景區管理處", value: 2, category: "南部風景區", color: "#38bdf8", description: "轄管屏東東港大鵬灣潟湖及琉球鄉（小琉球）珊瑚礁島嶼，主打水域遊憩、海龜生態與海島度假。" }
+                            ]
+                        },
+                        {
+                            id: "nsa-east",
+                            name: "東部地區 (2處)",
+                            category: "國家風景區管理處",
+                            color: "#0369a1",
+                            description: "轄管花東縱谷田園廊道與太平洋壯闊海岸線。",
+                            children: [
+                                { id: "nsa-erv", name: "花東縱谷國家風景區管理處", value: 2, category: "東部風景區", color: "#38bdf8", description: "轄管花蓮木瓜溪至台東卑南溪之間縱谷平原，串聯瑞穗與安通溫泉、池上關山田園及原住民族部落體驗。" },
+                                { id: "nsa-eastcoast", name: "東部海岸國家風景區管理處", value: 2, category: "東部風景區", color: "#38bdf8", description: "轄管花蓮溪口至台東小野柳海岸線及綠島，以三仙台、八仙洞、石梯坪與秀姑巒溪泛舟聞名。" }
+                            ]
+                        },
+                        {
+                            id: "nsa-islands",
+                            name: "離島地區 (2處)",
+                            category: "國家風景區管理處",
+                            color: "#0369a1",
+                            description: "轄管台灣海峽離島群島之玄武岩地質、戰地史蹟與海洋生態。",
+                            children: [
+                                { id: "nsa-penghu", name: "澎湖國家風景區管理處", value: 2, category: "離島風景區", color: "#38bdf8", description: "轄管澎湖群島（馬公本島及南海、北海諸島），推動玄武岩地質景觀保育、海洋運動與國際海上花火節。" },
+                                { id: "nsa-matsu", name: "馬祖國家風景區管理處", value: 2, category: "離島風景區", color: "#38bdf8", description: "轄管連江縣南竿、北竿、莒光及東引四鄉五島，結合閩東石屋聚落、戰地坑道文化與藍眼淚生態奇觀。" }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: "field-and-overseas",
+                    name: "任務編組與派出單位",
+                    category: "海內外第一線服務與推廣據點",
+                    color: "#d97706",
+                    description: "包含國內機場與交通樞紐之旅遊服務中心（3處），以及分布於全球五大區域的駐外辦事處（17處）。",
+                    children: [
+                        {
+                            id: "visitor-centers",
+                            name: "旅遊(客)服務中心 (3處)",
+                            category: "旅客諮詢接待單位",
+                            color: "#b45309",
+                            description: "提供國內外旅客第一線觀光諮詢、旅遊摺頁索取、導覽指引與緊急協助。",
+                            children: [
+                                { id: "vc-hq", name: "觀光署旅遊服務中心", value: 1.8, category: "旅遊服務中心", color: "#fbbf24", description: "位於台北總部，並於台中設置服務處、金門水頭商港設置服務櫃台，提供全方位旅遊諮詢服務。" },
+                                { id: "vc-taoyuan", name: "臺灣桃園國際機場旅客服務中心", value: 1.8, category: "旅客服務中心", color: "#fbbf24", description: "設於桃園國際機場第一、二航廈入境大廳，為國際旅客抵台第一線觀光接待與諮詢窗口。" },
+                                { id: "vc-kaohsiung", name: "高雄國際機場旅客服務中心", value: 1.8, category: "旅客服務中心", color: "#fbbf24", description: "設於高雄小港國際機場，並另設台南服務處與高雄服務處，服務南台灣出入境旅客。" }
+                            ]
+                        },
+                        {
+                            id: "overseas-offices",
+                            name: "駐外辦事處 (全球17處據點)",
+                            category: "海外市場推廣據點",
+                            color: "#b45309",
+                            description: "受國際組業務督導，派駐全球重點客源市場執行台灣觀光品牌行銷、旅展推廣與航空公司及旅行社合作。",
+                            children: [
+                                {
+                                    id: "ov-nea",
+                                    name: "東北亞地區 (4處)",
+                                    category: "駐外辦事處",
+                                    color: "#f59e0b",
+                                    description: "負責日本與韓國主要客源市場之觀光推廣業務。",
+                                    children: [
+                                        { id: "ov-tokyo", name: "東京辦事處", value: 1.2, category: "東北亞駐外據點", color: "#fcd34d", description: "負責東日本（關東、東北、北海道等）市場觀光行銷與媒體公關推廣。" },
+                                        { id: "ov-osaka", name: "大阪辦事處", value: 1.2, category: "東北亞駐外據點", color: "#fcd34d", description: "負責西日本（關西、中部、中國、四國、九州等）市場觀光推廣與修學旅行促進。" },
+                                        { id: "ov-seoul", name: "首爾辦事處", value: 1.2, category: "東北亞駐外據點", color: "#fcd34d", description: "負責韓國首都圈及中部地區觀光宣傳、韓流跨界合作與自由行市場開發。" },
+                                        { id: "ov-busan", name: "釜山辦事處", value: 1.2, category: "東北亞駐外據點", color: "#fcd34d", description: "負責韓國南部（釜山、大邱、慶尚道等）市場觀光推廣與直飛航線行銷。" }
+                                    ]
+                                },
+                                {
+                                    id: "ov-sea",
+                                    name: "東南亞地區 (4處)",
+                                    category: "駐外辦事處",
+                                    color: "#f59e0b",
+                                    description: "配合新南向政策，深耕東協各國穆斯林友善旅遊、獎勵旅遊與自由行市場。",
+                                    children: [
+                                        { id: "ov-singapore", name: "新加坡辦事處", value: 1.2, category: "東南亞駐外據點", color: "#fcd34d", description: "負責新加坡及周邊市場之精緻旅遊、親子旅遊與郵輪觀光推廣。" },
+                                        { id: "ov-kl", name: "吉隆坡辦事處", value: 1.2, category: "東南亞駐外據點", color: "#fcd34d", description: "負責馬來西亞、汶萊及印尼等市場推廣，重點推展穆斯林友善旅遊環境。" },
+                                        { id: "ov-bangkok", name: "曼谷辦事處", value: 1.2, category: "東南亞駐外據點", color: "#fcd34d", description: "負責泰國及緬甸、寮國等中南半島市場之觀光行銷與包機獎勵旅遊推廣。" },
+                                        { id: "ov-hcmc", name: "胡志明市辦事處", value: 1.2, category: "東南亞駐外據點", color: "#fcd34d", description: "負責越南及柬埔寨市場推廣，拓展企業獎勵旅遊與年輕自由行客群。" }
+                                    ]
+                                },
+                                {
+                                    id: "ov-americas",
+                                    name: "美洲地區 (3處)",
+                                    category: "駐外辦事處",
+                                    color: "#f59e0b",
+                                    description: "負責北美及中南美洲長程線高消費客群與轉機過境旅遊市場開發。",
+                                    children: [
+                                        { id: "ov-ny", name: "紐約辦事處", value: 1.2, category: "美洲駐外據點", color: "#fcd34d", description: "負責美東、美國中西部及加拿大東部市場之觀光宣傳與文化主題旅遊推廣。" },
+                                        { id: "ov-sf", name: "舊金山辦事處", value: 1.2, category: "美洲駐外據點", color: "#fcd34d", description: "負責北加州、美國西北地區及加拿大西部市場行銷，結合科技商務與生態旅遊。" },
+                                        { id: "ov-la", name: "洛杉磯辦事處", value: 1.2, category: "美洲駐外據點", color: "#fcd34d", description: "負責南加州、美國西南部及中南美洲市場之直飛航線推廣與高端旅遊行銷。" }
+                                    ]
+                                },
+                                {
+                                    id: "ov-europe",
+                                    name: "歐洲地區 (2處)",
+                                    category: "駐外辦事處",
+                                    color: "#f59e0b",
+                                    description: "負責歐洲各國文化深度旅遊、自行車與永續觀光市場推廣。",
+                                    children: [
+                                        { id: "ov-frankfurt", name: "法蘭克福辦事處", value: 1.2, category: "歐洲駐外據點", color: "#fcd34d", description: "負責德國、奧地利、瑞士、荷比盧及中東歐市場之觀光推廣與國際旅展參展。" },
+                                        { id: "ov-london", name: "倫敦辦事處", value: 1.2, category: "歐洲駐外據點", color: "#fcd34d", description: "負責英國、愛爾蘭、法國及北歐地區市場行銷，推廣台灣鐵道、茶文化與生態旅遊。" }
+                                    ]
+                                },
+                                {
+                                    id: "ov-gchina",
+                                    name: "港澳及大陸地區 (4處)",
+                                    category: "駐外辦事處",
+                                    color: "#f59e0b",
+                                    description: "負責港澳自由行市場推廣及海峽兩岸觀光交流事務聯繫。",
+                                    children: [
+                                        { id: "ov-hk", name: "香港辦事處", value: 1.2, category: "港澳及大陸駐外據點", color: "#fcd34d", description: "負責香港與澳門市場之主題旅遊、美食文化與節慶活動行銷推廣。" },
+                                        { id: "ov-beijing", name: "北京辦事處", value: 1.2, category: "港澳及大陸駐外據點", color: "#fcd34d", description: "台灣海峽兩岸觀光旅遊協會（台旅會）北京辦事處，負責華北及東北地區觀光交流聯繫。" },
+                                        { id: "ov-shanghai", name: "上海辦事處", value: 1.2, category: "港澳及大陸駐外據點", color: "#fcd34d", description: "台旅會上海辦事處，負責華東及華中地區觀光市場聯繫與旅遊資訊服務。" },
+                                        { id: "ov-fuzhou", name: "福州辦事處", value: 1.2, category: "港澳及大陸駐外據點", color: "#fcd34d", description: "台旅會上海辦事處福州辦公室，負責海西及華南地區小三通與觀光交流事務。" }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Flatten tree nodes for instant search & lookup
+        const flatNodes = [];
+        function indexTree(node, path = []) {
+            const currentPath = [...path, node.name];
+            flatNodes.push({
+                node: node,
+                path: currentPath
+            });
+            if (node.children) {
+                node.children.forEach(child => indexTree(child, currentPath));
+            }
+        }
+        indexTree(tourismOrgData);
+
+        // Application State
+        let currentMode = "tree"; // 'tree' | 'sunburst' | 'force'
+        let root = null;
+        let activeSeries = null;
+        let zoomableContainer = null;
+
+        // DOM Elements
+        const modeTabs = document.querySelectorAll(".mode-tab");
+        const modeHint = document.getElementById("modeHint");
+        const searchInput = document.getElementById("searchInput");
+        const clearSearchBtn = document.getElementById("clearSearchBtn");
+        const searchResults = document.getElementById("searchResults");
+        const expandAllBtn = document.getElementById("expandAllBtn");
+        const collapseAllBtn = document.getElementById("collapseAllBtn");
+        const resetViewBtn = document.getElementById("resetViewBtn");
+        const toastBanner = document.getElementById("toastBanner");
+
+        // Drawer Elements
+        const detailDrawer = document.getElementById("detailDrawer");
+        const mobileDrawerToggle = document.getElementById("mobileDrawerToggle");
+        const closeDrawerBtn = document.getElementById("closeDrawerBtn");
+        const detailPath = document.getElementById("detailPath");
+        const detailBadge = document.getElementById("detailBadge");
+        const detailChildCount = document.getElementById("detailChildCount");
+        const detailTitle = document.getElementById("detailTitle");
+        const detailDesc = document.getElementById("detailDesc");
+        const subUnitsSection = document.getElementById("subUnitsSection");
+        const detailSubUnits = document.getElementById("detailSubUnits");
+
+        // License Modal Elements
+        const licenseModal = document.getElementById("licenseModal");
+        const licenseModalBtn = document.getElementById("licenseModalBtn");
+        const closeLicenseBtn = document.getElementById("closeLicenseBtn");
+        const confirmLicenseBtn = document.getElementById("confirmLicenseBtn");
+
+        function showToast(message) {
+            toastBanner.textContent = message;
+            toastBanner.classList.remove("hidden");
+            clearTimeout(window.__toastTimer);
+            window.__toastTimer = setTimeout(() => {
+                toastBanner.classList.add("hidden");
+            }, 2600);
+        }
+
+        /**
+         * Updates the Right-Hand Detail Drawer with selected unit info
+         */
+        function updateDetailDrawer(nodeObj, pathArray = null) {
+            if (!nodeObj) return;
+            const found = flatNodes.find(item => item.node.id === nodeObj.id || item.node.name === nodeObj.name);
+            const path = pathArray || (found ? found.path : [nodeObj.name]);
+
+            detailPath.innerHTML = path.map((segment, idx) => {
+                const isLast = idx === path.length - 1;
+                return `<span class="${isLast ? 'font-bold text-[#0c2d48]' : 'text-teal-700/80'}">${segment}</span>${!isLast ? '<span class="text-slate-400 mx-0.5">/</span>' : ''}`;
+            }).join("");
+
+            detailBadge.textContent = nodeObj.category || "組織單位";
+            detailTitle.textContent = nodeObj.name;
+            detailDesc.textContent = nodeObj.description || `${nodeObj.name}，隸屬於交通部觀光署組織體系。`;
+
+            const children = nodeObj.children || [];
+            if (children.length > 0) {
+                detailChildCount.textContent = `下轄 ${children.length} 個直屬單位`;
+                subUnitsSection.classList.remove("hidden");
+                detailSubUnits.innerHTML = "";
+                children.forEach(child => {
+                    const btn = document.createElement("button");
+                    btn.className = "w-full text-left px-3 py-2 rounded-lg border border-slate-200/90 bg-white hover:bg-teal-50 hover:border-teal-300 transition flex items-center justify-between group";
+                    btn.innerHTML = `
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${child.color || '#0d9488'}"></span>
+                            <span class="text-xs font-medium text-slate-700 group-hover:text-teal-900 truncate">${child.name}</span>
+                        </div>
+                        <span class="text-[11px] text-slate-400 group-hover:text-teal-600 shrink-0 ml-2">
+                            ${child.children ? child.children.length + ' 項 ›' : '詳情 ›'}
+                        </span>
+                    `;
+                    btn.addEventListener("click", () => {
+                        focusNodeByName(child.name);
+                    });
+                    detailSubUnits.appendChild(btn);
+                });
+            } else {
+                detailChildCount.textContent = "基層執行單位";
+                subUnitsSection.classList.add("hidden");
+            }
+        }
+
+        /**
+         * Helper: Recursively expand or collapse amCharts hierarchy DataItems
+         */
+        function setTreeExpansion(dataItem, expand, maxDepth = 99, currentDepth = 0) {
+            if (!dataItem) return;
+            const children = dataItem.get("children");
+            if (children && children.length > 0) {
+                if (expand && currentDepth < maxDepth) {
+                    dataItem.set("isActive", true);
+                    children.forEach(child => setTreeExpansion(child, true, maxDepth, currentDepth + 1));
+                } else {
+                    children.forEach(child => setTreeExpansion(child, false, maxDepth, currentDepth + 1));
+                    if (currentDepth >= maxDepth) {
+                        dataItem.set("isActive", false);
+                    }
+                }
+            }
+        }
+
+        /**
+         * Find a DataItem in activeSeries by node name and expand its ancestor path
+         */
+        function findAndRevealDataItem(dataItem, targetName) {
+            if (!dataItem) return null;
+            const ctx = dataItem.dataContext;
+            if (ctx && ctx.name === targetName) {
+                return dataItem;
+            }
+            const children = dataItem.get("children");
+            if (children) {
+                for (let i = 0; i < children.length; i++) {
+                    const match = findAndRevealDataItem(children[i], targetName);
+                    if (match) {
+                        // Ensure parent is expanded in Tree/Force modes
+                        if (currentMode === "tree" || currentMode === "force") {
+                            dataItem.set("isActive", true);
+                        }
+                        return match;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Focuses a node in whichever chart mode is currently active
+         */
+        function focusNodeByName(name) {
+            const entry = flatNodes.find(item => item.node.name === name);
+            if (!entry) return;
+
+            updateDetailDrawer(entry.node, entry.path);
+
+            if (!activeSeries || activeSeries.dataItems.length === 0) return;
+            const rootDataItem = activeSeries.dataItems[0];
+            const targetItem = findAndRevealDataItem(rootDataItem, name);
+
+            if (targetItem) {
+                if (currentMode === "sunburst") {
+                    // Zoom Sunburst sector to target (or its parent if leaf)
+                    if (targetItem.get("children") && targetItem.get("children").length > 0) {
+                        activeSeries.selectDataItem(targetItem);
+                    } else if (targetItem.get("parent")) {
+                        activeSeries.selectDataItem(targetItem.get("parent"));
+                    }
+                } else if (currentMode === "tree" && zoomableContainer) {
+                    // Gently center node after expansion settles
+                    setTimeout(() => {
+                        const nodeSprite = targetItem.get("node");
+                        if (nodeSprite) {
+                            const x = nodeSprite.x();
+                            const y = nodeSprite.y();
+                            zoomableContainer.goHome(200);
+                            setTimeout(() => {
+                                zoomableContainer.zoomToPoint({ x: x, y: y }, 1.25, true);
+                            }, 220);
+                        }
+                    }, 350);
+                }
+                showToast(`已定位至：${name}`);
+            }
+
+            // Open drawer on mobile screens so user sees details immediately
+            if (window.innerWidth < 1024) {
+                detailDrawer.classList.remove("translate-x-full");
+            }
+        }
+
+        /**
+         * Cleanly disposes previous am5.Root and renders the selected chart mode
+         */
+        function renderChart(mode) {
+            currentMode = mode;
+
+            // Update Tab UI styles
+            modeTabs.forEach(tab => {
+                if (tab.dataset.mode === mode) {
+                    tab.classList.add("bg-white", "text-[#0c2d48]", "shadow-sm");
+                    tab.classList.remove("text-sky-100", "hover:text-white", "hover:bg-white/10");
+                } else {
+                    tab.classList.remove("bg-white", "text-[#0c2d48]", "shadow-sm");
+                    tab.classList.add("text-sky-100", "hover:text-white", "hover:bg-white/10");
+                }
+            });
+
+            // Toggle toolbar buttons relevance
+            if (mode === "sunburst") {
+                expandAllBtn.classList.add("opacity-40", "pointer-events-none");
+                collapseAllBtn.classList.add("opacity-40", "pointer-events-none");
+                modeHint.textContent = "💡 提示：點擊扇形區塊可向下鑽取放大，點擊中心圓心返回上一層";
+            } else if (mode === "force") {
+                expandAllBtn.classList.remove("opacity-40", "pointer-events-none");
+                collapseAllBtn.classList.remove("opacity-40", "pointer-events-none");
+                modeHint.textContent = "💡 提示：可自由拖曳節點觀察物理彈力網絡，點擊節點收合或展開子部門";
+            } else {
+                expandAllBtn.classList.remove("opacity-40", "pointer-events-none");
+                collapseAllBtn.classList.remove("opacity-40", "pointer-events-none");
+                modeHint.textContent = "💡 提示：點擊圓形節點展開/收合分支，滾輪縮放、拖曳平移畫布";
+            }
+
+            // Dispose existing amCharts Root cleanly
+            if (root) {
+                root.dispose();
+                root = null;
+                activeSeries = null;
+                zoomableContainer = null;
+            }
+
+            // Initialize fresh am5.Root
+            root = am5.Root.new("chartdiv");
+            root.setThemes([
+                am5themes_Animated.new(root),
+                am5themes_ResponsiveMax.new(root),
+                am5themes_Adaptive.new(root)
+            ]);
+
+            if (mode === "tree") {
+                renderHorizontalTree(root);
+            } else if (mode === "sunburst") {
+                renderSunburstChart(root);
+            } else if (mode === "force") {
+                renderForceDirectedChart(root);
+            }
+        }
+
+        /**
+         * MODE 1: Horizontal Tree Chart (am5hierarchy.Tree)
+         * Uses circles.template (never rectangles.template) inside ZoomableContainer with ZoomTools
+         */
+        function renderHorizontalTree(root) {
+            zoomableContainer = root.container.children.push(
+                am5.ZoomableContainer.new(root, {
+                    width: am5.p100,
+                    height: am5.p100,
+                    wheelable: true,
+                    pinchZoom: true
+                })
+            );
+
+            // Add ZoomTools control on bottom-right
+            const zoomTools = zoomableContainer.children.push(
+                am5.ZoomTools.new(root, {
+                    target: zoomableContainer
+                })
+            );
+            zoomTools.setAll({
+                x: am5.p100,
+                centerX: am5.p100,
+                dx: -16,
+                y: am5.p100,
+                centerY: am5.p100,
+                dy: -16
+            });
+
+            const series = zoomableContainer.contents.children.push(
+                am5hierarchy.Tree.new(root, {
+                    singleBranchExpand: false,
+                    downDepth: 1,
+                    initialDepth: 2,
+                    topDepth: 0,
+                    valueField: "value",
+                    categoryField: "name",
+                    childDataField: "children",
+                    orientation: "horizontal",
+                    nodePadding: 14,
+                    paddingLeft: 40,
+                    paddingRight: 240,
+                    paddingTop: 30,
+                    paddingBottom: 30
+                })
+            );
+
+            activeSeries = series;
+
+            // Style connecting links
+            series.links.template.setAll({
+                strokeWidth: 2,
+                strokeOpacity: 0.45,
+                stroke: am5.color(0x64748b)
+            });
+
+            // Style native Tree circles (fixes TypeError: rectangles.template does not exist on Tree)
+            series.circles.template.setAll({
+                radius: 10,
+                strokeWidth: 2.5,
+                stroke: am5.color(0xffffff),
+                cursorOverStyle: "pointer"
+            });
+
+            series.circles.template.adapters.add("fill", function(fill, target) {
+                const ctx = target.dataItem && target.dataItem.dataContext;
+                if (ctx && ctx.color) {
+                    return am5.color(ctx.color);
+                }
+                return fill;
+            });
+
+            series.outerCircles.template.setAll({
+                radius: 14,
+                strokeWidth: 2,
+                strokeOpacity: 0.6
+            });
+
+            series.outerCircles.template.adapters.add("stroke", function(stroke, target) {
+                const ctx = target.dataItem && target.dataItem.dataContext;
+                if (ctx && ctx.color) {
+                    return am5.color(ctx.color);
+                }
+                return stroke;
+            });
+
+            // Configure crisp horizontal labels positioned to the right of circles so Chinese names never overlap
+            series.labels.template.setAll({
+                fontSize: 13,
+                fontWeight: "600",
+                fill: am5.color(0x0f172a),
+                textAlign: "left",
+                centerX: am5.p0,
+                x: 16,
+                centerY: am5.p50,
+                oversizedBehavior: "none",
+                populateText: true,
+                text: "{name}"
+            });
+
+            // Rich hover tooltip
+            series.nodes.template.setAll({
+                tooltipText: "[bold fontSize:14px]{name}[/]\n[fontSize:12px]{description}[/]",
+                cursorOverStyle: "pointer"
+            });
+
+            // Click event updates right-hand detail drawer
+            series.nodes.template.events.on("click", function(ev) {
+                const ctx = ev.target.dataItem && ev.target.dataItem.dataContext;
+                if (ctx) {
+                    updateDetailDrawer(ctx);
+                }
+            });
+
+            series.data.setAll([tourismOrgData]);
+            series.set("selectedDataItem", series.dataItems[0]);
+            series.appear(800, 100);
+        }
+
+        /**
+         * MODE 2: Sunburst Chart (am5hierarchy.Sunburst)
+         * Based on Sunburst Flavor Wheel template with drill-down sector zooming
+         */
+        function renderSunburstChart(root) {
+            const container = root.container.children.push(
+                am5.Container.new(root, {
+                    width: am5.p100,
+                    height: am5.p100,
+                    layout: root.verticalLayout,
+                    paddingTop: 12,
+                    paddingBottom: 12,
+                    paddingLeft: 12,
+                    paddingRight: 12
+                })
+            );
+
+            const series = container.children.push(
+                am5hierarchy.Sunburst.new(root, {
+                    singleBranchExpand: true,
+                    downDepth: 2,
+                    initialDepth: 2,
+                    topDepth: 0,
+                    innerRadius: am5.percent(18),
+                    valueField: "value",
+                    categoryField: "name",
+                    childDataField: "children"
+                })
+            );
+
+            activeSeries = series;
+
+            series.slices.template.setAll({
+                tooltipText: "[bold]{name}[/]\n{description}",
+                stroke: am5.color(0xffffff),
+                strokeWidth: 2,
+                cursorOverStyle: "pointer"
+            });
+
+            series.slices.template.adapters.add("fill", function(fill, target) {
+                const ctx = target.dataItem && target.dataItem.dataContext;
+                if (ctx && ctx.color) {
+                    return am5.color(ctx.color);
+                }
+                return fill;
+            });
+
+            series.labels.template.setAll({
+                fontSize: 11,
+                fontWeight: "600",
+                fill: am5.color(0xffffff),
+                text: "{name}",
+                oversizedBehavior: "truncate",
+                maxWidth: 110
+            });
+
+            series.nodes.template.events.on("click", function(ev) {
+                const ctx = ev.target.dataItem && ev.target.dataItem.dataContext;
+                if (ctx) {
+                    updateDetailDrawer(ctx);
+                }
+            });
+
+            series.data.setAll([tourismOrgData]);
+            series.set("selectedDataItem", series.dataItems[0]);
+            series.appear(900, 100);
+        }
+
+        /**
+         * MODE 3: Force-Directed Network Graph (am5hierarchy.ForceDirected)
+         * Based on Force-Directed Network template with interactive physics & draggable nodes
+         */
+        function renderForceDirectedChart(root) {
+            const container = root.container.children.push(
+                am5.Container.new(root, {
+                    width: am5.p100,
+                    height: am5.p100
+                })
+            );
+
+            const series = container.children.push(
+                am5hierarchy.ForceDirected.new(root, {
+                    singleBranchExpand: false,
+                    downDepth: 1,
+                    topDepth: 0,
+                    initialDepth: 2,
+                    valueField: "value",
+                    categoryField: "name",
+                    childDataField: "children",
+                    minRadius: 18,
+                    maxRadius: am5.percent(8.5),
+                    manyBodyStrength: -22,
+                    centerStrength: 0.75,
+                    linkWithStrength: 0.6
+                })
+            );
+
+            activeSeries = series;
+
+            series.links.template.setAll({
+                strokeWidth: 1.8,
+                strokeOpacity: 0.45,
+                stroke: am5.color(0x64748b),
+                distance: 1.35
+            });
+
+            series.circles.template.setAll({
+                strokeWidth: 2.5,
+                stroke: am5.color(0xffffff),
+                cursorOverStyle: "grab"
+            });
+
+            series.circles.template.adapters.add("fill", function(fill, target) {
+                const ctx = target.dataItem && target.dataItem.dataContext;
+                if (ctx && ctx.color) {
+                    return am5.color(ctx.color);
+                }
+                return fill;
+            });
+
+            series.outerCircles.template.setAll({
+                strokeWidth: 2,
+                strokeOpacity: 0.55
+            });
+
+            series.labels.template.setAll({
+                fontSize: 11,
+                fontWeight: "600",
+                fill: am5.color(0xffffff),
+                text: "{name}",
+                oversizedBehavior: "wrap",
+                maxWidth: 95,
+                textAlign: "center"
+            });
+
+            series.nodes.template.setAll({
+                tooltipText: "[bold]{name}[/]\n{description}",
+                draggable: true
+            });
+
+            series.nodes.template.events.on("click", function(ev) {
+                const ctx = ev.target.dataItem && ev.target.dataItem.dataContext;
+                if (ctx) {
+                    updateDetailDrawer(ctx);
+                }
+            });
+
+            series.data.setAll([tourismOrgData]);
+            series.set("selectedDataItem", series.dataItems[0]);
+            series.appear(900, 100);
+        }
+
+        // Event Listeners: Mode Switcher Tabs
+        modeTabs.forEach(tab => {
+            tab.addEventListener("click", () => {
+                const selectedMode = tab.dataset.mode;
+                if (selectedMode !== currentMode) {
+                    renderChart(selectedMode);
+                }
+            });
+        });
+
+        // Event Listeners: Expand All / Collapse All / Reset View
+        expandAllBtn.addEventListener("click", () => {
+            if (!activeSeries || activeSeries.dataItems.length === 0) return;
+            setTreeExpansion(activeSeries.dataItems[0], true, 99, 0);
+            showToast("已展開所有組織分支");
+        });
+
+        collapseAllBtn.addEventListener("click", () => {
+            if (!activeSeries || activeSeries.dataItems.length === 0) return;
+            setTreeExpansion(activeSeries.dataItems[0], false, 1, 0);
+            if (zoomableContainer) {
+                zoomableContainer.goHome(300);
+            }
+            showToast("已收合至第一層主部門");
+        });
+
+        resetViewBtn.addEventListener("click", () => {
+            updateDetailDrawer(tourismOrgData, ["交通部觀光署"]);
+            renderChart(currentMode);
+            showToast("已重置視角與初始階層狀態");
+        });
+
+        // Event Listeners: Real-Time Search Input
+        searchInput.addEventListener("input", (e) => {
+            const query = e.target.value.trim().toLowerCase();
+            if (!query) {
+                clearSearchBtn.classList.add("hidden");
+                searchResults.classList.add("hidden");
+                return;
+            }
+            clearSearchBtn.classList.remove("hidden");
+
+            const matches = flatNodes.filter(item => {
+                const n = item.node;
+                return n.name.toLowerCase().includes(query) ||
+                       (n.description && n.description.toLowerCase().includes(query)) ||
+                       (n.category && n.category.toLowerCase().includes(query));
+            });
+
+            searchResults.innerHTML = "";
+            if (matches.length === 0) {
+                searchResults.innerHTML = `<div class="px-4 py-3 text-xs text-slate-400 text-center">找不到符合「${e.target.value}」的單位</div>`;
+            } else {
+                matches.slice(0, 12).forEach(match => {
+                    const row = document.createElement("button");
+                    row.className = "w-full text-left px-3.5 py-2.5 hover:bg-teal-50/80 transition flex flex-col gap-0.5";
+                    row.innerHTML = `
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs font-bold text-slate-800">${match.node.name}</span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 shrink-0">${match.node.category || '單位'}</span>
+                        </div>
+                        <span class="text-[11px] text-slate-400 truncate">${match.path.join(" › ")}</span>
+                    `;
+                    row.addEventListener("click", () => {
+                        searchResults.classList.add("hidden");
+                        searchInput.value = match.node.name;
+                        focusNodeByName(match.node.name);
+                    });
+                    searchResults.appendChild(row);
+                });
+            }
+            searchResults.classList.remove("hidden");
+        });
+
+        clearSearchBtn.addEventListener("click", () => {
+            searchInput.value = "";
+            clearSearchBtn.classList.add("hidden");
+            searchResults.classList.add("hidden");
+        });
+
+        // Close search dropdown when clicking outside
+        document.addEventListener("click", (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.classList.add("hidden");
+            }
+        });
+
+        // Mobile Drawer Toggle
+        mobileDrawerToggle.addEventListener("click", () => {
+            detailDrawer.classList.toggle("translate-x-full");
+        });
+        closeDrawerBtn.addEventListener("click", () => {
+            detailDrawer.classList.add("translate-x-full");
+        });
+
+        // MIT License Modal Controls
+        licenseModalBtn.addEventListener("click", () => licenseModal.classList.remove("hidden"));
+        closeLicenseBtn.addEventListener("click", () => licenseModal.classList.add("hidden"));
+        confirmLicenseBtn.addEventListener("click", () => licenseModal.classList.add("hidden"));
+        licenseModal.addEventListener("click", (e) => {
+            if (e.target === licenseModal) licenseModal.classList.add("hidden");
+        });
+
+        // Initialize Application on am5.ready
+        am5.ready(function() {
+            updateDetailDrawer(tourismOrgData, ["交通部觀光署"]);
+            renderChart("tree");
+        });
+    </script>
+</body>
+</html>
